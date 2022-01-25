@@ -8,6 +8,8 @@ use ops::{
 };
 use strum::EnumMetadata;
 
+pub mod mask;
+
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct OpaqueRepr<O>
 where
