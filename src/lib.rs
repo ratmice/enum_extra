@@ -104,7 +104,8 @@ mod test {
 
     #[test]
     fn test() {
-        assert_eq!(ABC::A.opaque_repr(), ABC::A.opaque_repr());
+        let foo: OpaqueRepr<ABC> = ABC::A.opaque_repr();
+        assert_eq!(ABC::A.opaque_repr(), foo);
         assert_ne!(ABC::A.opaque_repr(), ABC::B.opaque_repr());
     }
 }
