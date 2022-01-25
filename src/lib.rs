@@ -2,6 +2,10 @@ use core::cmp;
 use core::marker::PhantomData;
 use core::ops;
 use num_traits::int::PrimInt;
+use ops::{
+    Add, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Div, Mul, Not, Rem, Shl,
+    ShlAssign, Shr, ShrAssign, Sub,
+};
 use strum::EnumMetadata;
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
@@ -57,6 +61,11 @@ pub trait OpaqueMetadata: EnumMetadata<Repr = <Self as OpaqueMetadata>::Repr> + 
     }
 }
 
+// Currently this implements *all* arithmetic traits,
+// I kind of think it would be better to just add the traits you need in various
+// OpaqueRepr newtypes,
+//
+// For instantce e.g. MaskIterator may just need the `Shl`, `PrimInt`, `BitXor` `BitOr`, ...
 impl<R, E> OpaqueMetadata for E
 where
     R: Copy
@@ -95,6 +104,113 @@ impl<E: OpaqueMetadata<EnumT = E> + EnumMetadata<EnumT = E>> EnumMetadata for Op
         Self::EnumT::from_repr(repr)
     }
 }
+
+impl<E: EnumMetadata + OpaqueMetadata> OpaqueRepr<E> {
+    pub fn zero() -> OpaqueRepr<E> {
+        OpaqueRepr::<E> {
+            repr: num_traits::identities::zero(),
+            _phantom_: PhantomData,
+        }
+    }
+
+    // Not unsafe but logically unchecked that from_repr will return Some(repr).
+    fn from_repr_unchecked(repr: <E as OpaqueMetadata>::Repr) -> OpaqueRepr<E> {
+        OpaqueRepr::<E> {
+            repr,
+            _phantom_: PhantomData,
+        }
+    }
+}
+
+macro_rules! binary_op {
+    ($trait:ident, $op:ident) => {
+        impl<E: EnumMetadata + OpaqueMetadata> $trait<E> for OpaqueRepr<E>
+        where
+            Self: EnumMetadata<Repr = <E as EnumMetadata>::Repr>,
+            <E as EnumMetadata>::Repr: $trait<Output = <E as EnumMetadata>::Repr>,
+        {
+            type Output = Self;
+            fn $op(self, other: E) -> OpaqueRepr<E> {
+                Self::from_repr_unchecked(<Self as EnumMetadata>::Repr::$op(
+                    self.to_repr(),
+                    other.to_repr(),
+                ))
+            }
+        }
+
+        impl<E: EnumMetadata + OpaqueMetadata> $trait<Self> for OpaqueRepr<E>
+        where
+            Self: EnumMetadata<Repr = <E as EnumMetadata>::Repr>,
+            <E as EnumMetadata>::Repr: $trait<Output = <E as EnumMetadata>::Repr>,
+        {
+            type Output = Self;
+            fn $op(self, other: OpaqueRepr<E>) -> OpaqueRepr<E> {
+                Self::from_repr_unchecked(<Self as EnumMetadata>::Repr::$op(
+                    self.to_repr(),
+                    other.to_repr(),
+                ))
+            }
+        }
+    };
+}
+
+macro_rules! unary_op {
+    ($trait:ident, $f:ident) => {
+        impl<E: EnumMetadata + OpaqueMetadata> $trait for OpaqueRepr<E>
+        where
+            Self: OpaqueMetadata<Repr = <E as OpaqueMetadata>::Repr>,
+            <E as OpaqueMetadata>::Repr: $trait<Output = <E as EnumMetadata>::Repr>,
+        {
+            type Output = Self;
+            fn $f(self) -> OpaqueRepr<E> {
+                Self::from_repr_unchecked(<Self as EnumMetadata>::Repr::$f(self.to_repr()))
+            }
+        }
+    };
+}
+
+macro_rules! binary_op_mut {
+    ($trait:ident, $op:ident) => {
+        impl<E: EnumMetadata + OpaqueMetadata> $trait<E> for OpaqueRepr<E>
+        where
+            Self: OpaqueMetadata<Repr = <E as OpaqueMetadata>::Repr>,
+            <E as OpaqueMetadata>::Repr: $trait,
+        {
+            fn $op(&mut self, other: E) {
+                <Self as EnumMetadata>::Repr::$op(&mut self.to_repr(), other.to_repr());
+            }
+        }
+
+        impl<E: EnumMetadata + OpaqueMetadata> $trait<Self> for OpaqueRepr<E>
+        where
+            Self: OpaqueMetadata<Repr = <E as OpaqueMetadata>::Repr>,
+            <E as OpaqueMetadata>::Repr: $trait,
+        {
+            fn $op(&mut self, other: OpaqueRepr<E>) {
+                <Self as OpaqueMetadata>::Repr::$op(&mut self.to_repr(), other.to_repr());
+            }
+        }
+    };
+}
+
+binary_op!(BitOr, bitor);
+binary_op!(BitAnd, bitand);
+binary_op!(BitXor, bitxor);
+binary_op!(Shr, shr);
+binary_op!(Shl, shl);
+unary_op!(Not, not);
+
+binary_op!(Add, add);
+binary_op!(Sub, sub);
+binary_op!(Mul, mul);
+binary_op!(Div, div);
+binary_op!(Rem, rem);
+
+binary_op_mut!(BitOrAssign, bitor_assign);
+binary_op_mut!(BitAndAssign, bitand_assign);
+binary_op_mut!(BitXorAssign, bitxor_assign);
+binary_op_mut!(ShrAssign, shr_assign);
+binary_op_mut!(ShlAssign, shl_assign);
 
 #[cfg(test)]
 mod test {
@@ -148,5 +264,16 @@ mod test {
             ABC::B.opaque_repr().to_repr(),
             ABC::A.opaque_repr().to_repr() + 1
         );
+
+        // For better or worse.
+        assert_eq!(
+            ABC::B.opaque_repr().to_repr(),
+            (ABC::A.opaque_repr() + ABC::B.opaque_repr()).to_repr()
+        );
+
+        assert_eq!(
+            OpaqueRepr::<ABC>::zero().to_repr(),
+            ABC::A.opaque_repr().to_repr(),
+        )
     }
 }
