@@ -4,7 +4,15 @@ use num_traits::int::PrimInt;
 use strum::EnumMetadata;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MaskIterator<
-    R: PrimInt,
+    R: PrimInt
+        + ops::Shr
+        + ops::Shl
+        + ops::BitOrAssign
+        + ops::BitAndAssign
+        + ops::BitXorAssign
+        + ops::ShrAssign
+        + ops::ShlAssign
+        + core::fmt::Debug,
     E: OpaqueMetadata<Repr = R, EnumT = E>,
     O: OpaqueMetadata<Repr = R, EnumT = E>,
 > {
@@ -62,7 +70,15 @@ impl<
 }
 
 impl<
-        R: ops::BitXorAssign + PrimInt + core::fmt::Debug,
+        R: PrimInt
+            + ops::Shr
+            + ops::Shl
+            + ops::BitOrAssign
+            + ops::BitAndAssign
+            + ops::BitXorAssign
+            + ops::ShrAssign
+            + ops::ShlAssign
+            + core::fmt::Debug,
         E: OpaqueMetadata<Repr = R, EnumT = E> + EnumMetadata<EnumT = E>,
         O: OpaqueMetadata<Repr = R, EnumT = E>,
     > Iterator for MaskIterator<R, E, O>
@@ -198,9 +214,15 @@ mod test {
         use UnsupportedByMaskIterator::*;
 
         let mask = Ox0.opaque_repr();
-        assert_eq!(mask.mask_iter().collect::<Vec<UnsupportedByMaskIter>>(), []);
+        assert_eq!(
+            mask.mask_iter().collect::<Vec<UnsupportedByMaskIterator>>(),
+            []
+        );
 
         let mask = Ox11.opaque_repr();
-        assert_eq!(mask.mask_iter().collect::<Vec<UnsupportedByMaskIter>>(), []);
+        assert_eq!(
+            mask.mask_iter().collect::<Vec<UnsupportedByMaskIterator>>(),
+            []
+        );
     }
 }

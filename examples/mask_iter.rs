@@ -1,8 +1,8 @@
 fn main() {
     use enum_extra::mask::Mask;
     use enum_extra::{OpaqueMetadata, OpaqueRepr};
-    use strum_macros::EnumMetadata;
     use strum::EnumMetadata;
+    use strum_macros::EnumMetadata;
 
     #[derive(EnumMetadata, Debug, Eq, PartialEq)]
     enum Foo {

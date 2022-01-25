@@ -53,7 +53,15 @@ where
 
 impl<R, E> OpaqueMetadata for E
 where
-    R: PrimInt,
+    R: PrimInt
+        + Shl
+        + Shr
+        + BitAndAssign
+        + BitOrAssign
+        + BitXorAssign
+        + ShlAssign
+        + ShrAssign
+        + core::fmt::Debug,
     E: EnumMetadata<Repr = R>,
 {
 }
