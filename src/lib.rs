@@ -30,7 +30,6 @@ where
 {
 }
 
-
 pub trait OpaqueMetadata: EnumMetadata<Repr=<Self as OpaqueMetadata>::Repr> + Sized
 {
     type Repr: Copy
@@ -54,16 +53,10 @@ pub trait OpaqueMetadata: EnumMetadata<Repr=<Self as OpaqueMetadata>::Repr> + Si
 
     type EnumT;
 
-    fn to_repr(self) -> <Self as OpaqueMetadata>::Repr
-    {
-       <Self as EnumMetadata>::to_repr(self)
-    }
-
     fn opaque_repr(self) -> OpaqueRepr<Self>
     {
-        let repr: <Self as OpaqueMetadata>::Repr = <Self as OpaqueMetadata>::to_repr(self);
         OpaqueRepr {
-            repr,
+            repr: Self::to_repr(self),
             _phantom_: PhantomData,
         }
     }
@@ -103,9 +96,15 @@ mod test {
     }
 
     #[test]
-    fn test() {
+    fn test_opaque_repr_eq() {
         let foo: OpaqueRepr<ABC> = ABC::A.opaque_repr();
         assert_eq!(ABC::A.opaque_repr(), foo);
-        assert_ne!(ABC::A.opaque_repr(), ABC::B.opaque_repr());
+        assert_ne!(ABC::B.opaque_repr(), foo);
+    }
+
+    #[test]
+    fn test_from_repr() {
+        assert_eq!(Some(ABC::A), ABC::from_repr(ABC::A.to_repr()));
+        assert_ne!(Some(ABC::C), ABC::from_repr(ABC::A.to_repr()));
     }
 }
