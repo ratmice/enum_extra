@@ -2,6 +2,7 @@ use crate::OpaqueMetadata;
 use core::ops;
 use num_traits::int::PrimInt;
 use strum::EnumMetadata;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MaskIterator<
     R: PrimInt
@@ -129,7 +130,15 @@ mod test {
     use strum_macros::EnumMetadata;
     use strum_macros::FromRepr;
 
-    #[derive(Debug, Eq, PartialEq, EnumMetadata, FromRepr)]
+    macro_rules! test_eq {
+        ($a:expr, $b:expr) => {
+            for (x, y) in core::iter::Iterator::zip($a, $b.iter().cloned()) {
+                assert_eq!(x, y)
+            }
+        };
+    }
+
+    #[derive(Debug, Eq, PartialEq, EnumMetadata, FromRepr, Clone)]
     #[repr(u8)]
     enum ABC {
         A = 1 << 0,
@@ -140,20 +149,20 @@ mod test {
     #[test]
     fn test_mask_iter() {
         let mask = ABC::A.opaque_repr();
-        assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), [ABC::A]);
+        test_eq!(mask.mask_iter(), [ABC::A]);
         let mask = ABC::A.opaque_repr() | ABC::B;
-        assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), [ABC::A, ABC::B]);
+        test_eq!(mask.mask_iter(), [ABC::A, ABC::B]);
         let mask = ABC::C.opaque_repr() | ABC::B.opaque_repr();
-        assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), [ABC::B, ABC::C]);
+        test_eq!(mask.mask_iter(), [ABC::B, ABC::C]);
     }
 
     #[test]
     fn test_opaque_zero_repr() {
         let mask: OpaqueRepr<ABC> = OpaqueRepr::zero();
-        assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), []);
+        test_eq!(mask.mask_iter(), []);
     }
 
-    #[derive(Debug, Eq, PartialEq, EnumMetadata)]
+    #[derive(Debug, Eq, PartialEq, EnumMetadata, Clone)]
     #[repr(u8)]
     enum ReprBoundary {
         End = 1 << 7,
@@ -162,13 +171,10 @@ mod test {
     #[test]
     fn test_repr_boundary() {
         let mask = ReprBoundary::End.opaque_repr();
-        assert_eq!(
-            mask.mask_iter().collect::<Vec<ReprBoundary>>(),
-            [ReprBoundary::End]
-        );
+        test_eq!(mask.mask_iter(), [ReprBoundary::End]);
     }
 
-    #[derive(Debug, Eq, PartialEq, EnumMetadata)]
+    #[derive(Debug, Eq, PartialEq, EnumMetadata, Clone)]
     #[repr(u8)]
     enum ReprSaturated {
         A = 1 << 0,
@@ -185,15 +191,16 @@ mod test {
     fn test_repr_saturated() {
         use ReprSaturated::*;
         let mask = A.opaque_repr();
-        assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [A]);
+        test_eq!(mask.mask_iter(), [A]);
         let mask = A.opaque_repr() | H;
-        assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [A, H]);
+        test_eq!(mask.mask_iter(), [A, H]);
+
         let mask = B.opaque_repr() | H;
-        assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [B, H]);
+        test_eq!(mask.mask_iter(), [B, H]);
         let mask = B.opaque_repr() | G;
-        assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [B, G]);
+        test_eq!(mask.mask_iter(), [B, G]);
         let mask = G.opaque_repr() | B;
-        assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [B, G]);
+        test_eq!(mask.mask_iter(), [B, G]);
     }
 
     // Neither of these variants fulfill the constraints on variants
@@ -203,7 +210,7 @@ mod test {
     // Ox0 has zero unique 1 bits, and Ox11 has 2.
     //
     // Just check that it handles being given these gracefully.
-    #[derive(Debug, Eq, PartialEq, EnumMetadata)]
+    #[derive(Debug, Eq, PartialEq, EnumMetadata, Clone)]
     enum UnsupportedByMaskIterator {
         Ox0 = 0,
         Ox11 = 0x3,
@@ -214,15 +221,8 @@ mod test {
         use UnsupportedByMaskIterator::*;
 
         let mask = Ox0.opaque_repr();
-        assert_eq!(
-            mask.mask_iter().collect::<Vec<UnsupportedByMaskIterator>>(),
-            []
-        );
-
+        test_eq!(mask.mask_iter(), []);
         let mask = Ox11.opaque_repr();
-        assert_eq!(
-            mask.mask_iter().collect::<Vec<UnsupportedByMaskIterator>>(),
-            []
-        );
+        test_eq!(mask.mask_iter(), []);
     }
 }

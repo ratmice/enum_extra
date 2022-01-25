@@ -1,3 +1,4 @@
+#![no_std]
 use core::marker::PhantomData;
 use core::ops;
 use num_traits::int::PrimInt;
