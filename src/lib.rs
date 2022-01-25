@@ -83,6 +83,25 @@ where R:  Copy
     type EnumT = E::EnumT;
 }
 
+impl<E: OpaqueMetadata<EnumT = E> + EnumMetadata<EnumT=E>> EnumMetadata for OpaqueRepr<E> {
+    type Repr = <E as EnumMetadata>::Repr;
+    type EnumT = E;
+
+
+    const VARIANTS: &'static [&'static str] = Self::EnumT::VARIANTS;
+    const COUNT: usize = Self::EnumT::COUNT;
+    const REPR_SIZE: usize = Self::EnumT::REPR_SIZE;
+
+    fn to_repr(self) -> Self::Repr {
+        self.repr
+    }
+
+    fn from_repr(repr: Self::Repr) -> Option<Self::EnumT> {
+        Self::EnumT::from_repr(repr)
+    }
+
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -106,5 +125,19 @@ mod test {
     fn test_from_repr() {
         assert_eq!(Some(ABC::A), ABC::from_repr(ABC::A.to_repr()));
         assert_ne!(Some(ABC::C), ABC::from_repr(ABC::A.to_repr()));
+    }
+
+    #[test]
+    fn test_from_repr_opq() {
+        assert_eq!(OpaqueRepr::from_repr(ABC::A.to_repr()), ABC::from_repr(ABC::A.to_repr()));
+        assert_ne!(OpaqueRepr::from_repr(ABC::B.to_repr()), ABC::from_repr(ABC::A.to_repr()));
+    }
+
+    #[test]
+    fn test_to_repr_opq() {
+        assert_eq!(ABC::A.to_repr(), ABC::A.opaque_repr().to_repr());
+        assert_eq!(ABC::A.opaque_repr().to_repr(), ABC::A.opaque_repr().to_repr());
+        assert_ne!(ABC::B.opaque_repr().to_repr(), ABC::A.opaque_repr().to_repr());
+        assert_eq!(ABC::B.opaque_repr().to_repr(), ABC::A.opaque_repr().to_repr() + 1);
     }
 }
