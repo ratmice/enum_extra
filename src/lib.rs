@@ -1,4 +1,3 @@
-use core::cmp;
 use core::marker::PhantomData;
 use core::ops;
 use num_traits::int::PrimInt;
@@ -42,8 +41,7 @@ where
 
 pub trait OpaqueMetadata: EnumMetadata + Sized
 where
-    Self::Repr: cmp::Eq + cmp::PartialEq + cmp::Ord + cmp::PartialOrd + PrimInt,
-    Self::Repr: cmp::Eq + cmp::PartialEq + cmp::Ord + cmp::PartialOrd + PrimInt,
+    Self::Repr: PrimInt,
 {
     fn opaque_repr(self) -> OpaqueRepr<Self> {
         OpaqueRepr {
@@ -53,11 +51,6 @@ where
     }
 }
 
-// Currently this implements *all* arithmetic traits,
-// I kind of think it would be better to just add the traits you need in various
-// OpaqueRepr newtypes,
-//
-// For instantce e.g. MaskIterator may just need the `Shl`, `PrimInt`, `BitXor` `BitOr`, ...
 impl<R, E> OpaqueMetadata for E
 where
     R: PrimInt,
