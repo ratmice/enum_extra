@@ -13,7 +13,7 @@ pub struct MaskIterator<
     phantom: core::marker::PhantomData<(O, R)>,
 }
 
-pub trait MaskIter: Sized
+pub trait Mask: Sized
 where
     Self: OpaqueMetadata,
     Self::Repr: PrimInt,
@@ -37,7 +37,7 @@ impl<
             + PrimInt,
         E: OpaqueMetadata<EnumT = E, Repr = R> + EnumMetadata<EnumT = E>,
         O: Copy + OpaqueMetadata<EnumT = E, Repr = R>,
-    > MaskIter for O
+    > Mask for O
 {
     type I = MaskIterator<R, E, O>;
 
@@ -188,14 +188,14 @@ mod test {
     //
     // Just check that it handles being given these gracefully.
     #[derive(Debug, Eq, PartialEq, EnumMetadata)]
-    enum UnsupportedByMaskIter {
+    enum UnsupportedByMaskIterator {
         Ox0 = 0,
         Ox11 = 0x3,
     }
 
     #[test]
     fn test_mask_iter_enum_constraints() {
-        use UnsupportedByMaskIter::*;
+        use UnsupportedByMaskIterator::*;
 
         let mask = Ox0.opaque_repr();
         assert_eq!(mask.mask_iter().collect::<Vec<UnsupportedByMaskIter>>(), []);
