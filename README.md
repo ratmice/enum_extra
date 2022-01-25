@@ -24,3 +24,5 @@ getting it into a releasable state is currently a work in progress.
     let things = repr.mask_iter().collect::<Vec<Foo>>();
     assert_eq!(things, [Foo::Bar, Foo::Baz]);
 ```
+
+minimum supported rust version: 1.32 (currently all features).
