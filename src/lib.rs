@@ -14,14 +14,16 @@ pub mod mask;
 pub struct OpaqueRepr<O>
 where
     O: OpaqueMetadata,
+    O::Repr: PrimInt,
 {
-    repr: <O as OpaqueMetadata>::Repr,
+    repr: O::Repr,
     _phantom_: PhantomData<O>,
 }
 
 impl<O> Clone for OpaqueRepr<O>
 where
     O: OpaqueMetadata,
+    O::Repr: PrimInt,
 {
     fn clone(&self) -> Self {
         OpaqueRepr {
@@ -31,30 +33,18 @@ where
     }
 }
 
-impl<O> Copy for OpaqueRepr<O> where O: OpaqueMetadata {}
+impl<O> Copy for OpaqueRepr<O>
+where
+    O: OpaqueMetadata,
+    O::Repr: PrimInt,
+{
+}
 
-pub trait OpaqueMetadata: EnumMetadata<Repr = <Self as OpaqueMetadata>::Repr> + Sized {
-    type Repr: Copy
-        + ops::BitOr
-        + ops::BitAnd
-        + ops::BitXor
-        + ops::Shr
-        + ops::Shl
-        + ops::Not
-        + ops::BitOrAssign
-        + ops::BitAndAssign
-        + ops::BitXorAssign
-        + ops::ShrAssign
-        + ops::ShlAssign
-        + core::fmt::Debug
-        + cmp::Eq
-        + cmp::PartialEq
-        + cmp::Ord
-        + cmp::PartialOrd
-        + PrimInt;
-
-    type EnumT;
-
+pub trait OpaqueMetadata: EnumMetadata + Sized
+where
+    Self::Repr: cmp::Eq + cmp::PartialEq + cmp::Ord + cmp::PartialOrd + PrimInt,
+    Self::Repr: cmp::Eq + cmp::PartialEq + cmp::Ord + cmp::PartialOrd + PrimInt,
+{
     fn opaque_repr(self) -> OpaqueRepr<Self> {
         OpaqueRepr {
             repr: Self::to_repr(self),
@@ -70,28 +60,16 @@ pub trait OpaqueMetadata: EnumMetadata<Repr = <Self as OpaqueMetadata>::Repr> + 
 // For instantce e.g. MaskIterator may just need the `Shl`, `PrimInt`, `BitXor` `BitOr`, ...
 impl<R, E> OpaqueMetadata for E
 where
-    R: Copy
-        + ops::BitOr<Output = R>
-        + ops::BitAnd<Output = R>
-        + ops::BitXor<Output = R>
-        + ops::Shr<Output = R>
-        + ops::Shl<Output = R>
-        + ops::Not<Output = R>
-        + ops::BitOrAssign
-        + ops::BitAndAssign
-        + ops::BitXorAssign
-        + ops::ShrAssign
-        + ops::ShlAssign
-        + core::fmt::Debug
-        + PrimInt,
+    R: PrimInt,
     E: EnumMetadata<Repr = R>,
 {
-    type Repr = R;
-    type EnumT = E::EnumT;
 }
 
-impl<E: OpaqueMetadata<EnumT = E> + EnumMetadata<EnumT = E>> EnumMetadata for OpaqueRepr<E> {
-    type Repr = <E as EnumMetadata>::Repr;
+impl<E: OpaqueMetadata<EnumT = E> + EnumMetadata<EnumT = E>> EnumMetadata for OpaqueRepr<E>
+where
+    E::Repr: PrimInt,
+{
+    type Repr = E::Repr;
     type EnumT = E;
 
     const VARIANTS: &'static [&'static str] = Self::EnumT::VARIANTS;
@@ -107,7 +85,10 @@ impl<E: OpaqueMetadata<EnumT = E> + EnumMetadata<EnumT = E>> EnumMetadata for Op
     }
 }
 
-impl<E: EnumMetadata + OpaqueMetadata> OpaqueRepr<E> {
+impl<E: EnumMetadata + OpaqueMetadata> OpaqueRepr<E>
+where
+    E::Repr: PrimInt,
+{
     pub fn zero() -> OpaqueRepr<E> {
         OpaqueRepr::<E> {
             repr: num_traits::identities::zero(),
@@ -116,7 +97,7 @@ impl<E: EnumMetadata + OpaqueMetadata> OpaqueRepr<E> {
     }
 
     // Not unsafe but logically unchecked that from_repr will return Some(repr).
-    fn from_repr_unchecked(repr: <E as OpaqueMetadata>::Repr) -> OpaqueRepr<E> {
+    fn from_repr_unchecked(repr: E::Repr) -> OpaqueRepr<E> {
         OpaqueRepr::<E> {
             repr,
             _phantom_: PhantomData,
@@ -128,8 +109,8 @@ macro_rules! binary_op {
     ($trait:ident, $op:ident) => {
         impl<E: EnumMetadata + OpaqueMetadata> $trait<E> for OpaqueRepr<E>
         where
-            Self: EnumMetadata<Repr = <E as EnumMetadata>::Repr>,
-            <E as EnumMetadata>::Repr: $trait<Output = <E as EnumMetadata>::Repr>,
+            Self: EnumMetadata<Repr = E::Repr>,
+            E::Repr: $trait<Output = E::Repr> + PrimInt,
         {
             type Output = Self;
             fn $op(self, other: E) -> OpaqueRepr<E> {
@@ -142,8 +123,8 @@ macro_rules! binary_op {
 
         impl<E: EnumMetadata + OpaqueMetadata> $trait<Self> for OpaqueRepr<E>
         where
-            Self: EnumMetadata<Repr = <E as EnumMetadata>::Repr>,
-            <E as EnumMetadata>::Repr: $trait<Output = <E as EnumMetadata>::Repr>,
+            Self: EnumMetadata<Repr = E::Repr>,
+            E::Repr: $trait<Output = E::Repr> + PrimInt,
         {
             type Output = Self;
             fn $op(self, other: OpaqueRepr<E>) -> OpaqueRepr<E> {
@@ -160,8 +141,8 @@ macro_rules! unary_op {
     ($trait:ident, $f:ident) => {
         impl<E: EnumMetadata + OpaqueMetadata> $trait for OpaqueRepr<E>
         where
-            Self: OpaqueMetadata<Repr = <E as OpaqueMetadata>::Repr>,
-            <E as OpaqueMetadata>::Repr: $trait<Output = <E as EnumMetadata>::Repr>,
+            Self: OpaqueMetadata<Repr = E::Repr>,
+            E::Repr: $trait<Output = E::Repr> + PrimInt,
         {
             type Output = Self;
             fn $f(self) -> OpaqueRepr<E> {
@@ -175,8 +156,8 @@ macro_rules! binary_op_mut {
     ($trait:ident, $op:ident) => {
         impl<E: EnumMetadata + OpaqueMetadata> $trait<E> for OpaqueRepr<E>
         where
-            Self: OpaqueMetadata<Repr = <E as OpaqueMetadata>::Repr>,
-            <E as OpaqueMetadata>::Repr: $trait,
+            Self: OpaqueMetadata<Repr = E::Repr>,
+            E::Repr: $trait + PrimInt,
         {
             fn $op(&mut self, other: E) {
                 <Self as EnumMetadata>::Repr::$op(&mut self.to_repr(), other.to_repr());
@@ -185,11 +166,11 @@ macro_rules! binary_op_mut {
 
         impl<E: EnumMetadata + OpaqueMetadata> $trait<Self> for OpaqueRepr<E>
         where
-            Self: OpaqueMetadata<Repr = <E as OpaqueMetadata>::Repr>,
-            <E as OpaqueMetadata>::Repr: $trait,
+            Self: OpaqueMetadata<Repr = E::Repr>,
+            E::Repr: $trait + PrimInt,
         {
             fn $op(&mut self, other: OpaqueRepr<E>) {
-                <Self as OpaqueMetadata>::Repr::$op(&mut self.to_repr(), other.to_repr());
+                <Self as EnumMetadata>::Repr::$op(&mut self.to_repr(), other.to_repr());
             }
         }
     };

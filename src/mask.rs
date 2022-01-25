@@ -1,25 +1,10 @@
 use crate::OpaqueMetadata;
 use core::ops;
 use num_traits::int::PrimInt;
-use num_traits::Num;
 use strum::EnumMetadata;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MaskIterator<
-    R: Copy
-        + ops::BitOr
-        + ops::BitAnd
-        + ops::BitXor
-        + ops::Shr
-        + ops::Shl
-        + ops::Not
-        + ops::BitOrAssign
-        + ops::BitAndAssign
-        + ops::BitXorAssign
-        + ops::ShrAssign
-        + ops::ShlAssign
-        + Num
-        + PrimInt
-        + core::fmt::Debug,
+    R: PrimInt,
     E: OpaqueMetadata<Repr = R, EnumT = E>,
     O: OpaqueMetadata<Repr = R, EnumT = E>,
 > {
@@ -31,30 +16,25 @@ pub struct MaskIterator<
 pub trait MaskIter: Sized
 where
     Self: OpaqueMetadata,
-    <Self as OpaqueMetadata>::Repr: core::ops::BitOr + core::ops::BitOrAssign,
-    <Self as EnumMetadata>::EnumT: EnumMetadata,
+    Self::Repr: PrimInt,
+    Self::EnumT: EnumMetadata,
 {
-    type I: Iterator<Item = <Self as OpaqueMetadata>::EnumT>;
+    type I: Iterator<Item = Self::EnumT>;
 
     fn mask_iter(&self) -> Self::I;
 }
 
 impl<
-        R: Copy
-            + ops::BitOr
-            + ops::BitAnd
-            + ops::BitXor
-            + ops::Shr
+        R: ops::Shr
             + ops::Shl
-            + ops::Not
+            + ops::BitOr
             + ops::BitOrAssign
             + ops::BitAndAssign
             + ops::BitXorAssign
             + ops::ShrAssign
             + ops::ShlAssign
-            + Num
-            + PrimInt
-            + core::fmt::Debug,
+            + core::fmt::Debug
+            + PrimInt,
         E: OpaqueMetadata<EnumT = E, Repr = R> + EnumMetadata<EnumT = E>,
         O: Copy + OpaqueMetadata<EnumT = E, Repr = R>,
     > MaskIter for O
@@ -64,7 +44,7 @@ impl<
     fn mask_iter(&self) -> MaskIterator<R, E, O> {
         let nextpos = |x: R| {
             let pos: usize = x.trailing_zeros() as usize;
-            if pos >= <E as OpaqueMetadata>::EnumT::REPR_SIZE * 8_usize {
+            if pos >= E::EnumT::REPR_SIZE * 8_usize {
                 None
             } else {
                 let one_r: R = num_traits::identities::one();
@@ -82,31 +62,17 @@ impl<
 }
 
 impl<
-        R: Copy
-            + ops::BitOr
-            + ops::BitAnd
-            + ops::BitXor
-            + ops::Shr
-            + ops::Shl
-            + ops::Not
-            + ops::BitOrAssign
-            + ops::BitAndAssign
-            + ops::BitXorAssign
-            + ops::ShrAssign
-            + ops::ShlAssign
-            + Num
-            + PrimInt
-            + core::fmt::Debug,
+        R: ops::BitXorAssign + PrimInt + core::fmt::Debug,
         E: OpaqueMetadata<Repr = R, EnumT = E> + EnumMetadata<EnumT = E>,
         O: OpaqueMetadata<Repr = R, EnumT = E>,
     > Iterator for MaskIterator<R, E, O>
 {
-    type Item = <E as OpaqueMetadata>::EnumT;
+    type Item = E::EnumT;
 
     fn next(&mut self) -> Option<Self::Item> {
         let nextpos = |x: R| {
             let pos: usize = x.trailing_zeros() as usize;
-            if pos >= (<E as OpaqueMetadata>::EnumT::REPR_SIZE * 8_usize) as usize {
+            if pos >= (E::EnumT::REPR_SIZE * 8_usize) as usize {
                 None
             } else {
                 let one_r: R = num_traits::identities::one();
@@ -115,12 +81,12 @@ impl<
         };
 
         let mut ret = None;
-        while let None = ret {
+        while ret.is_none() {
             if let Some(step) = &mut self.step {
                 let proposed_repr = *step & self.mask;
                 // Assumption: the single 1 bit in Some(step) is also 1 in self.mask.
                 assert_eq!(proposed_repr, *step);
-                ret = <E as OpaqueMetadata>::EnumT::from_repr(proposed_repr);
+                ret = E::EnumT::from_repr(proposed_repr);
                 // Strip that bit out of mask.
                 self.mask ^= *step;
                 self.step = nextpos(self.mask);
