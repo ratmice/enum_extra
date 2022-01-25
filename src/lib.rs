@@ -1,12 +1,13 @@
-use num_traits::int::PrimInt;
-use core::ops;
-use core::marker::PhantomData;
-use strum::EnumMetadata;
 use core::cmp;
+use core::marker::PhantomData;
+use core::ops;
+use num_traits::int::PrimInt;
+use strum::EnumMetadata;
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct OpaqueRepr<O>
-where O: OpaqueMetadata
+where
+    O: OpaqueMetadata,
 {
     repr: <O as OpaqueMetadata>::Repr,
     _phantom_: PhantomData<O>,
@@ -24,14 +25,9 @@ where
     }
 }
 
-impl<O> Copy for OpaqueRepr<O>
-where
-    O: OpaqueMetadata,
-{
-}
+impl<O> Copy for OpaqueRepr<O> where O: OpaqueMetadata {}
 
-pub trait OpaqueMetadata: EnumMetadata<Repr=<Self as OpaqueMetadata>::Repr> + Sized
-{
+pub trait OpaqueMetadata: EnumMetadata<Repr = <Self as OpaqueMetadata>::Repr> + Sized {
     type Repr: Copy
         + ops::BitOr
         + ops::BitAnd
@@ -53,8 +49,7 @@ pub trait OpaqueMetadata: EnumMetadata<Repr=<Self as OpaqueMetadata>::Repr> + Si
 
     type EnumT;
 
-    fn opaque_repr(self) -> OpaqueRepr<Self>
-    {
+    fn opaque_repr(self) -> OpaqueRepr<Self> {
         OpaqueRepr {
             repr: Self::to_repr(self),
             _phantom_: PhantomData,
@@ -62,14 +57,15 @@ pub trait OpaqueMetadata: EnumMetadata<Repr=<Self as OpaqueMetadata>::Repr> + Si
     }
 }
 
-impl<R, E> OpaqueMetadata for E 
-where R:  Copy
-        + ops::BitOr<Output=R>
-        + ops::BitAnd<Output=R>
-        + ops::BitXor<Output=R>
-        + ops::Shr<Output=R>
-        + ops::Shl<Output=R>
-        + ops::Not<Output=R>
+impl<R, E> OpaqueMetadata for E
+where
+    R: Copy
+        + ops::BitOr<Output = R>
+        + ops::BitAnd<Output = R>
+        + ops::BitXor<Output = R>
+        + ops::Shr<Output = R>
+        + ops::Shl<Output = R>
+        + ops::Not<Output = R>
         + ops::BitOrAssign
         + ops::BitAndAssign
         + ops::BitXorAssign
@@ -77,16 +73,15 @@ where R:  Copy
         + ops::ShlAssign
         + core::fmt::Debug
         + PrimInt,
-	E: EnumMetadata<Repr=R>
+    E: EnumMetadata<Repr = R>,
 {
     type Repr = R;
     type EnumT = E::EnumT;
 }
 
-impl<E: OpaqueMetadata<EnumT = E> + EnumMetadata<EnumT=E>> EnumMetadata for OpaqueRepr<E> {
+impl<E: OpaqueMetadata<EnumT = E> + EnumMetadata<EnumT = E>> EnumMetadata for OpaqueRepr<E> {
     type Repr = <E as EnumMetadata>::Repr;
     type EnumT = E;
-
 
     const VARIANTS: &'static [&'static str] = Self::EnumT::VARIANTS;
     const COUNT: usize = Self::EnumT::COUNT;
@@ -99,7 +94,6 @@ impl<E: OpaqueMetadata<EnumT = E> + EnumMetadata<EnumT=E>> EnumMetadata for Opaq
     fn from_repr(repr: Self::Repr) -> Option<Self::EnumT> {
         Self::EnumT::from_repr(repr)
     }
-
 }
 
 #[cfg(test)]
@@ -107,11 +101,11 @@ mod test {
     use super::*;
     use strum_macros::EnumMetadata;
     #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, EnumMetadata)]
-    #[repr(u8)] 
+    #[repr(u8)]
     enum ABC {
-       A = 0,
-       B = 1,
-       C = 2, 
+        A = 0,
+        B = 1,
+        C = 2,
     }
 
     #[test]
@@ -129,15 +123,30 @@ mod test {
 
     #[test]
     fn test_from_repr_opq() {
-        assert_eq!(OpaqueRepr::from_repr(ABC::A.to_repr()), ABC::from_repr(ABC::A.to_repr()));
-        assert_ne!(OpaqueRepr::from_repr(ABC::B.to_repr()), ABC::from_repr(ABC::A.to_repr()));
+        assert_eq!(
+            OpaqueRepr::from_repr(ABC::A.to_repr()),
+            ABC::from_repr(ABC::A.to_repr())
+        );
+        assert_ne!(
+            OpaqueRepr::from_repr(ABC::B.to_repr()),
+            ABC::from_repr(ABC::A.to_repr())
+        );
     }
 
     #[test]
     fn test_to_repr_opq() {
         assert_eq!(ABC::A.to_repr(), ABC::A.opaque_repr().to_repr());
-        assert_eq!(ABC::A.opaque_repr().to_repr(), ABC::A.opaque_repr().to_repr());
-        assert_ne!(ABC::B.opaque_repr().to_repr(), ABC::A.opaque_repr().to_repr());
-        assert_eq!(ABC::B.opaque_repr().to_repr(), ABC::A.opaque_repr().to_repr() + 1);
+        assert_eq!(
+            ABC::A.opaque_repr().to_repr(),
+            ABC::A.opaque_repr().to_repr()
+        );
+        assert_ne!(
+            ABC::B.opaque_repr().to_repr(),
+            ABC::A.opaque_repr().to_repr()
+        );
+        assert_eq!(
+            ABC::B.opaque_repr().to_repr(),
+            ABC::A.opaque_repr().to_repr() + 1
+        );
     }
 }
