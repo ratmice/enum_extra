@@ -26,3 +26,4 @@ getting it into a releasable state is currently a work in progress.
 ```
 
 minimum supported rust version: 1.32 (currently all features).
+no_std: enabled by default (all features, all tests).
