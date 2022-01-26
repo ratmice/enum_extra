@@ -5,7 +5,7 @@ getting it into a releasable state is currently a work in progress.
 
 * A `OpaqueRepr` type `OpaqueRepr<YourEnum>` generic over all types which implement `EnumMetadata` from [strum](https://github.com)
 * A `MaskIterator` which iterates over unique single bit non-zero enum variants.
-
+* A `NonZeroRepr` trait/derive macro which checks that your descriminants aren't zero.
 
 
 ```

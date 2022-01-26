@@ -8,6 +8,7 @@ use ops::{
 };
 use strum::EnumMetadata;
 
+pub mod marker;
 pub mod mask;
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]

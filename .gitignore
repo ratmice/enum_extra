@@ -1,2 +1,5 @@
 /target
 Cargo.lock
+lib/Cargo.lock
+derive/Cargo.lock
+lib/wip/**
