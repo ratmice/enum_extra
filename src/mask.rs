@@ -130,9 +130,12 @@ mod test {
     use strum_macros::EnumMetadata;
     use strum_macros::FromRepr;
 
+    // If (or perhaps when) we bump minimum rustc version to use const generics
+    // get rid of this and just use arrayvec.
     macro_rules! test_eq {
         ($a:expr, $b:expr) => {
             for (x, y) in core::iter::Iterator::zip($a, $b.iter().cloned()) {
+                // Probably not ideal in its output...
                 assert_eq!(x, y)
             }
         };
