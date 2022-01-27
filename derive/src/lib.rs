@@ -72,7 +72,7 @@ fn impl_non_zero_repr(ast: &syn::DeriveInput) -> TokenStream {
     let impl_body = quote!(
 
 
-            #( #[allow(clippy::unused_unit)] const _: () = if ::core::num::NonZeroU8::new(#discriminants).is_some() { () } else { panic!("Expected non-zero discriminant") }; )*
+            #( #[allow(clippy::unused_unit)] const _: () = if ::core::num::NonZeroU8::new(#discriminants).is_some() { () } else { panic!("Expected non-zero discriminant expression") }; )*
             impl NonZeroRepr for #name {
 
             }
