@@ -21,11 +21,23 @@ mod test {
     }
 
     #[test]
-    fn test_simple() {
+    fn test_literal_discriminant() {
         assert!(generic_derived(XYZ::X))
     }
 
     fn generic_derived<X: NonZeroRepr>(_foo: X) -> bool {
         true
+    }
+
+    #[derive(NonZeroRepr, EnumMetadata)]
+    enum XYZZ {
+        X = 1 << 0,
+        Y = 1 << 1,
+        Z = 1 << 2,
+    }
+
+    #[test]
+    fn test_expr_discriminant() {
+        assert!(generic_derived(XYZZ::X))
     }
 }

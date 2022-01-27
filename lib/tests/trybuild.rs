@@ -1,3 +1,4 @@
+#![cfg(feature = "trybuild_tests")]
 #[test]
 fn compile_fail() {
     let t = trybuild::TestCases::new();

@@ -13,6 +13,7 @@ pub struct MaskIterator<
         + ops::BitXorAssign
         + ops::ShrAssign
         + ops::ShlAssign
+        + core::fmt::Display
         + core::fmt::Debug,
     E: OpaqueMetadata<Repr = R, EnumT = E>,
     O: OpaqueMetadata<Repr = R, EnumT = E>,
@@ -43,6 +44,7 @@ impl<
             + ops::ShrAssign
             + ops::ShlAssign
             + core::fmt::Debug
+            + core::fmt::Display
             + PrimInt,
         E: OpaqueMetadata<EnumT = E, Repr = R> + EnumMetadata<EnumT = E>,
         O: Copy + OpaqueMetadata<EnumT = E, Repr = R>,
@@ -79,6 +81,7 @@ impl<
             + ops::BitXorAssign
             + ops::ShrAssign
             + ops::ShlAssign
+            + core::fmt::Display
             + core::fmt::Debug,
         E: OpaqueMetadata<Repr = R, EnumT = E> + EnumMetadata<EnumT = E>,
         O: OpaqueMetadata<Repr = R, EnumT = E>,

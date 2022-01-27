@@ -28,11 +28,15 @@ getting it into a releasable state is currently a work in progress.
 * A `NonZeroRepr` trait/derive macro which checks that your descriminants aren't zero.
 ```
 #[derive(NonZeroRepr, EnumMetadata)]
+#[repr(u8)]
 enum Foo {
-	A = 1;
+	A = 1,
+	A = 1 << 2,
 }
 ```
 
-minimum supported rust version: 1.32 (currently all features).
-
+minimum supported rust versions by feature
+1.32: (MaskIterator, OpaqueRepr).
+1.57: (NonZeroRepr)
+unknown: trybuild_tests
 no_std: enabled by default (all features, all tests).
