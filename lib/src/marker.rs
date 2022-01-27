@@ -1,12 +1,11 @@
-use strum::EnumMetadata;
-
-pub trait NonZeroRepr: EnumMetadata {
+pub trait NonZeroRepr {
     // TODO add an associated type
     // I guess that would technically not be a marker any longer
     // type NonZeroRepr;
 }
 
 #[cfg(test)]
+#[allow(unused)]
 mod test {
     use super::*;
     use enum_extra_derive::NonZeroRepr;
@@ -29,7 +28,7 @@ mod test {
         true
     }
 
-    #[derive(NonZeroRepr, EnumMetadata)]
+    #[derive(NonZeroRepr)]
     enum XYZZ {
         X = 1 << 0,
         Y = 1 << 1,

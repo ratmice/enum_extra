@@ -1,5 +1,5 @@
 error: proc-macro derive panicked
- --> tests/compile-fail/nonzero.rs:7:24
+ --> tests/compile-fail/nonzero_fail_1.rs:7:24
   |
 7 | #[derive(EnumMetadata, NonZeroRepr)]
   |                        ^^^^^^^^^^^
