@@ -15,8 +15,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    - name: rust-grcov
+      uses: actions-rs/grcov@v0.1.5
+      with:
+        # Path to the configuration file (optional, relative to the repository root)
+        config: .github/actions-rs/grcov.yml
