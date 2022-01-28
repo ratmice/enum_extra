@@ -20,7 +20,20 @@ fn impl_non_zero_repr(ast: &syn::DeriveInput) -> TokenStream {
 
     let mut types = std::collections::HashMap::new();
     // FIXME more types..
-    for (k, v) in [("u8", "NonZeroU8")] {
+    for (k, v) in [
+        ("u8", "NonZeroU8"),
+        ("i8", "NonZeroI8"),
+        ("u16", "NonZeroU16"),
+        ("i16", "NonZeroI16"),
+        ("u32", "NonZeroU32"),
+        ("i32", "NonZeroI32"),
+        ("u64", "NonZeroU64"),
+        ("i64", "NonZeroI64"),
+        ("u128", "NonZeroU128"),
+        ("i128", "NonZeroI128"),
+        ("usize", "NonZeroUsize"),
+        ("isize", "NonZeroIsize"),
+    ] {
         types.insert(k.to_string(), v.to_string());
     }
     let nz_type_str = (|| {
