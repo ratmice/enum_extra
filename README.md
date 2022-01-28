@@ -5,8 +5,10 @@ getting it into a releasable state is a work in progress.
 
 * A `OpaqueRepr` type `OpaqueRepr<YourEnum>` generic over all types that implement `EnumMetadata` from [strum](https://github.com)
 ```
+  #[derive(EnumMetadata)]
   enum Foo { A };
-  let foo: OpaqueRepr<Foo> = Foo::A;
+  let foo: OpaqueRepr<Foo> = Foo::A.opaque_repr();
+  let _ = (foo | Foo::A).to_repr();
 ```
 * A `MaskIterator` which iterates over unique single bit non-zero enum variants.
 ```
