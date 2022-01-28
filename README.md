@@ -1,9 +1,9 @@
-extra enum things, currently this contains 2 things:
+extra enum things:
 
-This is currently unreleased and depends upon git branches of upstream crates,
-getting it into a releasable state is currently a work in progress.
+This is unreleased and depends upon git branches of upstream crates,
+getting it into a releasable state is a work in progress.
 
-* A `OpaqueRepr` type `OpaqueRepr<YourEnum>` generic over all types which implement `EnumMetadata` from [strum](https://github.com)
+* A `OpaqueRepr` type `OpaqueRepr<YourEnum>` generic over all types that implement `EnumMetadata` from [strum](https://github.com)
 ```
   enum Foo { A };
   let foo: OpaqueRepr<Foo> = Foo::A;
@@ -24,8 +24,10 @@ getting it into a releasable state is currently a work in progress.
     let repr: OpaqueRepr<Foo> = Foo::Bar.opaque_repr() | Foo::Baz;
     let things = repr.mask_iter().collect::<Vec<Foo>>();
     assert_eq!(things, [Foo::Bar, Foo::Baz]);
+
+
 ```
-* A `NonZeroRepr` trait/derive macro which checks that your descriminants aren't zero.
+* A `NonZeroRepr` trait/derive macro that checks that your discriminants aren't zero.
 ```
 #[derive(NonZeroRepr, EnumMetadata)]
 #[repr(u8)]
@@ -33,10 +35,18 @@ enum Foo {
 	A = 1,
 	A = 1 << 2,
 }
+
+// This generates an associated type NonZeroRepr equal to NonZeroU8.
+// The usage of which is currently rather obtuse due to the lack of any
+// traits on NonZero*
+let nz = Foo::A.nonzero_repr();
 ```
 
 minimum supported rust versions by feature
-1.32: (MaskIterator, OpaqueRepr).
-1.57: (NonZeroRepr)
-unknown: trybuild_tests
+* 1.32: (MaskIterator, OpaqueRepr).
+* 1.57: (NonZeroRepr)
+
 no_std: enabled by default (all features, all tests).
+
+features:
+* (claims 1.34): trybuild_tests

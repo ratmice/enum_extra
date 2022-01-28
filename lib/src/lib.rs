@@ -8,8 +8,9 @@ use ops::{
 };
 use strum::EnumMetadata;
 
-pub mod marker;
 pub mod mask;
+mod nonzero;
+pub use nonzero::*;
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct OpaqueRepr<O>

@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use enum_extra::marker::NonZeroRepr;
+use enum_extra::NonZeroRepr;
 use enum_extra_derive::NonZeroRepr;
 use strum::EnumMetadata;
 use strum_macros::EnumMetadata;
