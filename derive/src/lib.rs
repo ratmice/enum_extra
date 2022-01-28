@@ -32,23 +32,25 @@ fn impl_non_zero_repr(ast: &syn::DeriveInput) -> TokenStream {
         {
             for syn::PathSegment { ident, .. } in segments {
                 if ident == "repr" {
-                    for token in tokens.clone().into_iter() {
-                        match token {
-                            TokenTree::Group(group) => {
-                                for tree in group.stream() {
-                                    match tree {
-                                        TokenTree::Ident(ident) => {
-                                            let r#type = format!("{}", ident);
-                                            return types.get(&r#type);
-                                        }
-                                        TokenTree::Group(_)
-                                        | TokenTree::Punct(_)
-                                        | TokenTree::Literal(_) => panic!(),
+                    let mut tokens = tokens.clone().into_iter();
+                    // Not sure how to excercise these assertions.
+                    let token = tokens.next().unwrap();
+                    assert!(tokens.count() == 0);
+                    match token {
+                        TokenTree::Group(group) => {
+                            for tree in group.stream() {
+                                match tree {
+                                    TokenTree::Ident(ident) => {
+                                        let r#type = format!("{}", ident);
+                                        return types.get(&r#type);
                                     }
+                                    TokenTree::Group(_)
+                                    | TokenTree::Punct(_)
+                                    | TokenTree::Literal(_) => panic!(),
                                 }
                             }
-                            _ => continue,
                         }
+                        _ => continue,
                     }
                 }
             }

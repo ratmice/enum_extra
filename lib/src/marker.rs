@@ -1,6 +1,14 @@
+use core::{cmp, fmt};
 use strum::EnumMetadata;
 pub trait NonZeroRepr: EnumMetadata {
-    type NonZeroRepr;
+    type NonZeroRepr: Copy
+        + cmp::Eq
+        + cmp::Ord
+        + cmp::PartialEq
+        + cmp::PartialOrd
+        + fmt::Display
+        + fmt::Debug;
+
     fn nonzero_repr(self) -> Self::NonZeroRepr;
 }
 
