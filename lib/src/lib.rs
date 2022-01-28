@@ -63,6 +63,7 @@ where
         + BitXorAssign
         + ShlAssign
         + ShrAssign
+        + core::fmt::Display
         + core::fmt::Debug,
     E: EnumMetadata<Repr = R>,
 {

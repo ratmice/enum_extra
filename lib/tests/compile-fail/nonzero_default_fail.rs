@@ -4,12 +4,12 @@ use enum_extra_derive::NonZeroRepr;
 use strum::EnumMetadata;
 use strum_macros::EnumMetadata;
 
-#[derive(EnumMetadata, NonZeroRepr)]
-enum A {
-    A = 0 << 1,
+#[derive(NonZeroRepr, EnumMetadata)]
+#[repr(u8)]
+enum XYZZZ {
+    A,
 }
+
 
 fn main() {
 }
-
-

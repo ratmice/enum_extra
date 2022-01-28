@@ -12,4 +12,8 @@ strum = {version = "0.23.0", git="https://github.com/ratmice/strum.git", branch=
 strum_macros = {version = "0.23.0", git="https://github.com/ratmice/strum.git", branch="enum_metadata"}
 strum = {version = "0.23.0", git="https://github.com/ratmice/strum.git", branch="enum_metadata"}
 enum_extra_derive = {path="../derive"}
-trybuild = "1.0"
+trybuild = {version = "1.0"}
+
+[features]
+default=["trybuild_tests"]
+trybuild_tests=[]
