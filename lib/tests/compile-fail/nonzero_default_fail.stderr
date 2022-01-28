@@ -1,15 +1,7 @@
 error: proc-macro derive panicked
- --> tests/compile-fail/nonzero_default_fail.rs:6:10
+ --> tests/compile-fail/nonzero_default_fail.rs:7:10
   |
-6 | #[derive(NonZeroRepr)]
+7 | #[derive(NonZeroRepr, EnumMetadata)]
   |          ^^^^^^^^^^^
   |
   = help: message: Enum element defaults to zero
-
-warning: unused import: `strum::EnumMetadata`
- --> tests/compile-fail/nonzero_default_fail.rs:4:5
-  |
-4 | use strum::EnumMetadata;
-  |     ^^^^^^^^^^^^^^^^^^^
-  |
-  = note: `#[warn(unused_imports)]` on by default

@@ -5,6 +5,7 @@ use strum::EnumMetadata;
 use strum_macros::EnumMetadata;
 
 #[derive(EnumMetadata, NonZeroRepr)]
+#[repr(u8)]
 enum ABC {
     C = 2,
     B = 1,
