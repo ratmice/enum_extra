@@ -13,6 +13,9 @@ mod nonzero;
 pub use nonzero::*;
 pub use mask::*;
 
+#[cfg(feature = "derive")]
+pub use enum_extra_derive::*;
+
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct OpaqueRepr<O>
 where
@@ -204,7 +207,7 @@ binary_op_mut!(ShlAssign, shl_assign);
 #[cfg(test)]
 mod test {
     use super::*;
-    use strum_macros::EnumMetadata;
+    use strum::EnumMetadata;
     #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, EnumMetadata)]
     #[repr(u8)]
     enum ABC {

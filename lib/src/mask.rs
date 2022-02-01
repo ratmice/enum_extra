@@ -130,8 +130,8 @@ impl<
 mod test {
     use super::*;
     use crate::OpaqueRepr;
-    use strum_macros::EnumMetadata;
-    use strum_macros::FromRepr;
+    use strum::EnumMetadata;
+    use strum::FromRepr;
 
     // If (or perhaps when) we bump minimum rustc version to use const generics
     // get rid of this and just use arrayvec.

@@ -17,9 +17,8 @@ pub trait NonZeroRepr: EnumMetadata {
 mod test {
     use super::*;
     use core::num::NonZeroU8;
-    use enum_extra_derive::NonZeroRepr;
+    use enum_extra::NonZeroRepr;
     use strum::EnumMetadata;
-    use strum_macros::EnumMetadata;
 
     #[derive(NonZeroRepr, EnumMetadata, Clone, Copy)]
     #[repr(u8)]

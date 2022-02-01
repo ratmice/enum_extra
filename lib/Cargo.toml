@@ -7,13 +7,14 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 num-traits = "0.2.14"
 strum = {version = "0.23.0", git="https://github.com/ratmice/strum.git", branch="enum_metadata"}
+enum_extra_derive = {path="../derive", optional=true}
 
 [dev-dependencies]
-strum_macros = {version = "0.23.0", git="https://github.com/ratmice/strum.git", branch="enum_metadata"}
-strum = {version = "0.23.0", git="https://github.com/ratmice/strum.git", branch="enum_metadata"}
-enum_extra_derive = {path="../derive"}
+strum = {version = "0.23.0", git="https://github.com/ratmice/strum.git", branch="enum_metadata", features=["derive"]}
+enum_extra = {path=".", features=["derive"]}
 trybuild = {version = "1.0"}
 
 [features]
+derive=["enum_extra_derive"]
 default=["trybuild_tests"]
 trybuild_tests=[]

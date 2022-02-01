@@ -1,6 +1,4 @@
-use enum_extra_derive::NonZeroRepr;
 use enum_extra::NonZeroRepr;
-use strum_macros::EnumMetadata;
 use strum::EnumMetadata;
 
 #[repr(C)]
