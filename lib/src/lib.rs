@@ -11,6 +11,7 @@ use strum::EnumMetadata;
 pub mod mask;
 mod nonzero;
 pub use nonzero::*;
+pub use mask::*;
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct OpaqueRepr<O>
