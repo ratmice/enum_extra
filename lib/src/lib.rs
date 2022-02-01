@@ -166,7 +166,7 @@ macro_rules! binary_op_mut {
             E::Repr: $trait + PrimInt,
         {
             fn $op(&mut self, other: E) {
-                <Self as EnumMetadata>::Repr::$op(&mut self.to_repr(), other.to_repr());
+                <Self as EnumMetadata>::Repr::$op(&mut self.repr, other.to_repr());
             }
         }
 
@@ -176,7 +176,7 @@ macro_rules! binary_op_mut {
             E::Repr: $trait + PrimInt,
         {
             fn $op(&mut self, other: OpaqueRepr<E>) {
-                <Self as EnumMetadata>::Repr::$op(&mut self.to_repr(), other.to_repr());
+                <Self as EnumMetadata>::Repr::$op(&mut self.repr, other.to_repr());
             }
         }
     };
@@ -264,5 +264,15 @@ mod test {
             OpaqueRepr::<ABC>::zero().to_repr(),
             ABC::A.opaque_repr().to_repr(),
         )
+    }
+
+    #[test]
+    fn test_assign_op() {
+            let mut x = OpaqueRepr::<ABC>::zero();
+            x |= ABC::B;
+            assert_eq!(x, ABC::B.opaque_repr());
+            x <<= ABC::B;
+            assert_eq!(x, ABC::C.opaque_repr());
+
     }
 }
