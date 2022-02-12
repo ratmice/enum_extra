@@ -12,7 +12,7 @@ enum_extra_derive = {path="../derive", optional=true}
 [dev-dependencies]
 strum = {version = "0.23.0", git="https://github.com/ratmice/strum.git", branch="enum_metadata", features=["derive"]}
 enum_extra = {path=".", features=["derive"]}
-trybuild = {version = "1.0"}
+trybuild = {version = "1.0.56"}
 
 [features]
 derive=["enum_extra_derive"]
