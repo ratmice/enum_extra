@@ -29,19 +29,31 @@ getting it into a releasable state is a work in progress.
 
 
 ```
-* A `NonZeroRepr` trait/derive macro that checks that your discriminants aren't zero.
+* A `NonZeroRepr` trait/derive macro that checks at compile time that discriminants aren't zero.
 ```
 #[derive(NonZeroRepr, EnumMetadata)]
 #[repr(u8)]
 enum Foo {
 	A = 1,
-	A = 1 << 2,
+	B = 1 << 2,
 }
 
 // This generates an associated type NonZeroRepr equal to NonZeroU8.
 // The usage of which is currently rather obtuse due to the lack of any
 // traits on NonZero*
 let nz = Foo::A.nonzero_repr();
+```
+
+The compile time checks done by `NonZeroRepr` work with complex constant expressions such as:
+```
+const X: i32 = -1;
+
+#[derive(NonZeroRepr, EnumMetadata)]
+#[repr(i32)
+enum CompileFail {
+  // Should fail to compile.
+  A = X + 1,
+}
 ```
 
 minimum supported rust versions by feature
